@@ -13,3 +13,10 @@ jobs:
         fetch-depth: 0
     - name: Build
       run: ./gradlew build
+    - name: Test report
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Gradle Tests
+        path: build/test-results/test/*.xml
+        reporter: java-junit
