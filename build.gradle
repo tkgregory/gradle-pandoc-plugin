@@ -1,0 +1,26 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation 'com.bmuschko:gradle-docker-plugin:8.0.0'
+    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+gradlePlugin {
+    plugins {
+        fileDiff {
+            id = 'com.tomgregory.pandoc'
+            implementationClass = 'com.tomgregory.gradle.pandoc.PandocPlugin'
+        }
+    }
+}
