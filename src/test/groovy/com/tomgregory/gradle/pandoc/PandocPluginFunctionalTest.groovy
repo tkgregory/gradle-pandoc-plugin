@@ -44,8 +44,6 @@ class PandocPluginFunctionalTest extends Specification {
             }
 
             pandoc {
-                pandocDirectory = project.projectDir
-                
                 epub {
                     arguments = ['document.md']
                 }
@@ -71,8 +69,6 @@ class PandocPluginFunctionalTest extends Specification {
             }
 
             pandoc {
-                pandocDirectory = project.projectDir
-                
                 pdf {
                     arguments = ['document.md']
                 }
@@ -104,7 +100,6 @@ class PandocPluginFunctionalTest extends Specification {
             }
             
             pandoc {
-                pandocDirectory = project.projectDir
                 customDockerfile = file('Dockerfile')
                 
                 pdf {
@@ -133,8 +128,6 @@ class PandocPluginFunctionalTest extends Specification {
             }
             
             pandoc {
-                pandocDirectory = project.projectDir
-                
                 pdf {
                     arguments = ['document.md', '-H', 'title.sty']
                 }

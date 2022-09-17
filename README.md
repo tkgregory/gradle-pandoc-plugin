@@ -16,10 +16,10 @@ apply plugin: PandocPlugin
 
 A `pandoc` extension is available, in which you can configure the following properties.
 
-| Property name               | Description                                                                                                                       | Default                          |
-|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
-| `pandocDirectory`           | The directory made available to Pandoc. This must contain any files required to generated your documents, such as `.md` markdown. | None                             |
-| `customDockerfileDirectory` | If you want to provide a custom Docker image, set this to the directory containing the *Dockerfile*.                              | Uses `pandoc/latex:latest` image |
+| Property name        | Description                                                                                                                       | Default                         |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
+| `pandocDirectory`    | The directory made available to Pandoc. This must contain any files required to generated your documents, such as `.md` markdown. | Project directory               |
+| `customDockerfile`   | To use a custom Pandoc Docker image, set this to the *Dockerfile*.                                                                | Uses `pandoc/latex:latest` image |
 
 Note that the above properties apply to all output document formats.
 
