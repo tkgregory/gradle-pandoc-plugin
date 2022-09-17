@@ -5,6 +5,7 @@ import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerWaitContainer
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPullImage
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
@@ -13,6 +14,7 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 
 class PandocPlugin implements Plugin<Project> {
+    private final String DEFAULT_IMAGE = 'pandoc/latex:latest'
     def SUPPORTED_FORMATS = ['epub', 'pdf']
 
     @Override
@@ -39,23 +41,31 @@ class PandocPlugin implements Plugin<Project> {
             dependsOn copyDockerfileTask //project.tasks.named('processResources')
         }
 
+        TaskProvider<DockerPullImage> pullDefaultPandocImageTask = project.tasks.register('pullDefaultPandocImage', DockerPullImage) {
+            image = DEFAULT_IMAGE
+            enabled = !buildImageTask.get().isEnabled()
+        }
+
         SUPPORTED_FORMATS.each { String format ->
             DocumentFormatExtension documentFormatExtension = outerExtension.extensions[format]
-            registerTasksForDocumentFormat(project, buildImageTask, format,
+            registerTasksForDocumentFormat(project, buildImageTask, pullDefaultPandocImageTask, format,
                     outerExtension.pandocDirectory, documentFormatExtension.arguments)
         }
     }
 
-    private void registerTasksForDocumentFormat(Project project, TaskProvider<DockerBuildImage> buildImageTask, String format,
+    private void registerTasksForDocumentFormat(Project project, TaskProvider<DockerBuildImage> buildImageTask, TaskProvider<DockerPullImage> pullDefaultPandocImageTask, String format,
                                                 DirectoryProperty pandocDirectory, ListProperty<String> arguments) {
         def taskNameExtension = format.capitalize()
+
+
 
         def createContainerTask = project.tasks.register("createContainer$taskNameExtension", DockerCreateContainer) {
             if (buildImageTask.get().isEnabled()) {
                 dependsOn buildImageTask
                 targetImageId buildImageTask.get().getImageId()
             } else {
-                targetImageId 'pandoc/latex:latest'
+                dependsOn pullDefaultPandocImageTask
+                targetImageId DEFAULT_IMAGE
             }
             hostConfig.autoRemove = true
 
