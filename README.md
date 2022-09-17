@@ -1,6 +1,11 @@
+[![Gradle Pandoc Plugin](https://github.com/tkgregory/gradle-pandoc-plugin/actions/workflows/gradle.yml/badge.svg)](https://github.com/tkgregory/gradle-pandoc-plugin/actions/workflows/gradle.yml)
+
 This plugin makes it easy to generate various document formats from markdown, using Pandoc.
 
-All the document generation is done within a Docker image.
+Why use this plugin?
+
+* **no local Pandoc installation required:** document generation happens within Docker
+* **customisable document output format:** pass whatever arguments you like to Pandoc
 
 ## Pre-requisites
 
@@ -16,10 +21,10 @@ apply plugin: PandocPlugin
 
 A `pandoc` extension is available, in which you can configure the following properties.
 
-| Property name        | Description                                                                                                                       | Default                         |
-|----------------------|-----------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
-| `pandocDirectory`    | The directory made available to Pandoc. This must contain any files required to generated your documents, such as `.md` markdown. | Project directory               |
-| `customDockerfile`   | To use a custom Pandoc Docker image, set this to the *Dockerfile*.                                                                | Uses `pandoc/latex:latest` image |
+| Property name        | Description                                                                                                                      | Default                         |
+|----------------------|----------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
+| `pandocDirectory`    | The directory made available to Pandoc. This must contain any files required to generate your documents, such as `.md` markdown. | Project directory               |
+| `customDockerfile`   | To use a custom Pandoc Docker image, set this to the *Dockerfile*.                                                               | Uses `pandoc/latex:latest` image |
 
 Note that the above properties apply to all output document formats.
 
@@ -64,9 +69,8 @@ e.g. `generateEpub`, `generatePdf`
 These tasks are also all added to the `assemble` task as a task dependency, if present.
 
 ## Running
-Run any of the above tasks. e.g.
+To generate a specific document format, run the corresponding generate task e.g. 
 
 `./gradlew generateEpub`
 
-Once successfully completed, you'll find a file in the *build* directory of the
-format `<project-name>.<document-format>` e.g. `gradle-build-bible.epub`.
+On completion, in the pandoc directory a file is generated with name `<project-name>.<document-format>` e.g. `gradle-build-bible.epub`.
