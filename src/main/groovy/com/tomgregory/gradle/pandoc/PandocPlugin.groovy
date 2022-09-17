@@ -4,8 +4,10 @@ import com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerWaitContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerInspectContainer
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPullImage
+import com.github.dockerjava.api.command.InspectContainerResponse
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
@@ -77,17 +79,28 @@ class PandocPlugin implements Plugin<Project> {
             cmd = decoratedArguments
         }
 
-        def generateTask = project.tasks.register("generate$taskNameExtension", DockerStartContainer) {
-            group 'Document generation'
-
+        def generateTask = project.tasks.register("startContainer$taskNameExtension", DockerStartContainer) {
             dependsOn createContainerTask
             targetContainerId createContainerTask.get().getContainerId()
-            finalizedBy project.tasks.named("wait$taskNameExtension")
         }
 
-        project.tasks.register("wait$taskNameExtension", DockerWaitContainer) {
+        def waitTask = project.tasks.register("waitContainer$taskNameExtension", DockerWaitContainer) {
             dependsOn generateTask
             targetContainerId createContainerTask.get().getContainerId()
+        }
+
+        project.tasks.register("generate$taskNameExtension", DockerInspectContainer) {
+            group 'Document generation'
+
+            dependsOn waitTask
+            targetContainerId createContainerTask.get().getContainerId()
+            onNext { InspectContainerResponse response ->
+                if (response.state.exitCodeLong != 0) {
+                    def message = "Pandoc container $response.id failed with exit code $response.state.exitCodeLong"
+                    project.logger.error(message)
+                    throw new RuntimeException(message)
+                }
+            }
         }
 
         project.pluginManager.withPlugin('base') {
