@@ -2,6 +2,7 @@ package com.tomgregory.gradle.pandoc
 
 import com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerWaitContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerInspectContainer
@@ -59,8 +60,6 @@ class PandocPlugin implements Plugin<Project> {
                                                 DirectoryProperty pandocDirectory, ListProperty<String> arguments) {
         def taskNameExtension = format.capitalize()
 
-
-
         def createContainerTask = project.tasks.register("createContainer$taskNameExtension", DockerCreateContainer) {
             if (buildImageTask.get().isEnabled()) {
                 dependsOn buildImageTask
@@ -69,7 +68,6 @@ class PandocPlugin implements Plugin<Project> {
                 dependsOn pullDefaultPandocImageTask
                 targetImageId DEFAULT_IMAGE
             }
-            hostConfig.autoRemove = true
 
             hostConfig.binds = [(pandocDirectory.get().asFile.getAbsolutePath()): '/data']
 
@@ -89,10 +87,15 @@ class PandocPlugin implements Plugin<Project> {
             targetContainerId createContainerTask.get().getContainerId()
         }
 
+        def removeContainerTask = project.tasks.register("removeContainer$taskNameExtension", DockerRemoveContainer) {
+            targetContainerId createContainerTask.get().getContainerId()
+        }
+
         project.tasks.register("generate$taskNameExtension", DockerInspectContainer) {
             group 'Document generation'
 
             dependsOn waitTask
+            finalizedBy removeContainerTask
             targetContainerId createContainerTask.get().getContainerId()
             onNext { InspectContainerResponse response ->
                 if (response.state.exitCodeLong != 0) {
@@ -102,6 +105,8 @@ class PandocPlugin implements Plugin<Project> {
                 }
             }
         }
+
+
 
         project.pluginManager.withPlugin('base') {
             project.tasks.named('assemble') {
