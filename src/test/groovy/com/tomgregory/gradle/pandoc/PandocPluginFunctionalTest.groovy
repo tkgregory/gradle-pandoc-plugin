@@ -11,20 +11,14 @@ import static org.gradle.testkit.runner.TaskOutcome.FAILED
 class PandocPluginFunctionalTest extends Specification {
     @TempDir
     File testProjectDir
+    @TempDir
+    File customPandocDirectory
     File markdown
     File customLatexStyle
 
     def setup() {
         markdown = new File(testProjectDir, 'document.md')
-        markdown << """
-            # Important heading
-            
-            Some paragraph.
-            
-            ## Subheading
-            
-            More cool stuff.
-        """
+        writeMarkdown(markdown)
 
         customLatexStyle = new File(testProjectDir, 'title.sty')
         customLatexStyle << """
@@ -35,7 +29,7 @@ class PandocPluginFunctionalTest extends Specification {
         """
     }
 
-    def "builds EPUB with default Docker image"() {
+    def "builds EPUB"() {
         given:
         File buildFile = new File(testProjectDir, 'build.gradle')
         buildFile << """
@@ -60,7 +54,36 @@ class PandocPluginFunctionalTest extends Specification {
                 .size() == 1
     }
 
-    def "builds simple PDF with default Docker image"() {
+    def "builds EPUB with custom pandocDirectory"() {
+        given:
+        File markdown = new File(customPandocDirectory, 'document-in-custom-directory.md')
+        writeMarkdown(markdown)
+
+        File buildFile = new File(testProjectDir, 'build.gradle')
+        buildFile << """
+            plugins {
+                id 'com.tomgregory.pandoc'
+            }
+
+            pandoc {
+                pandocDirectory = file('${escapeBackslash(customPandocDirectory.path)}')
+                epub {
+                    arguments = ['document-in-custom-directory.md']
+                }
+            }
+        """
+        when:
+        def result = runnerForTask('generateEpub').build()
+
+        then:
+        result.task(":generateEpub").outcome == SUCCESS
+
+        customPandocDirectory.listFiles()
+                .findAll { it.path.endsWith('.epub') }
+                .size() == 1
+    }
+
+    def "builds simple PDF"() {
         given:
         File buildFile = new File(testProjectDir, 'build.gradle')
         buildFile << """
@@ -152,5 +175,21 @@ class PandocPluginFunctionalTest extends Specification {
                 .forwardOutput()
                 .withPluginClasspath()
                 .withDebug(true)
+    }
+
+    private File writeMarkdown(File markdown) {
+        markdown << """
+            # Important heading
+            
+            Some paragraph.
+            
+            ## Subheading
+            
+            More cool stuff.
+        """
+    }
+
+    private String escapeBackslash(String path) {
+        return path.replace('\\', "\\\\")
     }
 }
