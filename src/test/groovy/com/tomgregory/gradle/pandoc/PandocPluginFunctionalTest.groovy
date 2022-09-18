@@ -49,9 +49,7 @@ class PandocPluginFunctionalTest extends Specification {
         then:
         result.task(":generateEpub").outcome == SUCCESS
 
-        testProjectDir.listFiles()
-                .findAll { it.path.endsWith('.epub') }
-                .size() == 1
+        countProjectDirFilesWithSuffix('epub') == 1
     }
 
     def "builds EPUB with custom pandocDirectory"() {
@@ -103,9 +101,35 @@ class PandocPluginFunctionalTest extends Specification {
         then:
         result.task(":generatePdf").outcome == SUCCESS
 
-        testProjectDir.listFiles()
-                .findAll { it.path.endsWith('.pdf') }
-                .size() == 1
+        countProjectDirFilesWithSuffix('pdf') == 1
+    }
+
+    def "builds EPUB and simple PDF with assemble"() {
+        given:
+        File buildFile = new File(testProjectDir, 'build.gradle')
+        buildFile << """
+            plugins {
+                id 'base'
+                id 'com.tomgregory.pandoc'
+            }
+
+            pandoc {
+                epub {
+                    arguments = ['document.md']
+                }            
+                pdf {
+                    arguments = ['document.md']
+                }
+            }
+        """
+        when:
+        def result = runnerForTask('assemble').build()
+
+        then:
+        result.task(":assemble").outcome == SUCCESS
+
+        countProjectDirFilesWithSuffix('epub') == 1
+        countProjectDirFilesWithSuffix('pdf') == 1
     }
 
     def "builds complex PDF with custom Docker image"() {
@@ -137,9 +161,7 @@ class PandocPluginFunctionalTest extends Specification {
         then:
         result.task(":generatePdf").outcome == SUCCESS
 
-        testProjectDir.listFiles()
-                .findAll { it.path.endsWith('.pdf') }
-                .size() == 1
+        countProjectDirFilesWithSuffix('pdf') == 1
     }
 
     def "fails to build complex PDF with default Docker image"() {
@@ -163,9 +185,7 @@ class PandocPluginFunctionalTest extends Specification {
         then:
         result.task(":generatePdf").outcome == FAILED
 
-        testProjectDir.listFiles()
-                .findAll { it.path.endsWith('.pdf') }
-                .isEmpty()
+        countProjectDirFilesWithSuffix('pdf') == 0
     }
 
     private GradleRunner runnerForTask(String taskName) {
@@ -191,5 +211,11 @@ class PandocPluginFunctionalTest extends Specification {
 
     private String escapeBackslash(String path) {
         return path.replace('\\', "\\\\")
+    }
+
+    private int countProjectDirFilesWithSuffix(String suffix) {
+        return testProjectDir.listFiles()
+                .findAll { it.path.endsWith(".$suffix") }
+                .size()
     }
 }

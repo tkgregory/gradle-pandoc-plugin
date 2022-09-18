@@ -77,13 +77,13 @@ class PandocPlugin implements Plugin<Project> {
             cmd = decoratedArguments
         }
 
-        def generateTask = project.tasks.register("startContainer$taskNameExtension", DockerStartContainer) {
+        def startContainerTask = project.tasks.register("startContainer$taskNameExtension", DockerStartContainer) {
             dependsOn createContainerTask
             targetContainerId createContainerTask.get().getContainerId()
         }
 
         def waitTask = project.tasks.register("waitContainer$taskNameExtension", DockerWaitContainer) {
-            dependsOn generateTask
+            dependsOn startContainerTask
             targetContainerId createContainerTask.get().getContainerId()
         }
 
@@ -91,7 +91,7 @@ class PandocPlugin implements Plugin<Project> {
             targetContainerId createContainerTask.get().getContainerId()
         }
 
-        project.tasks.register("generate$taskNameExtension", DockerInspectContainer) {
+        def inspectContainerTask = project.tasks.register("generate$taskNameExtension", DockerInspectContainer) {
             group 'Document generation'
 
             dependsOn waitTask
@@ -110,7 +110,7 @@ class PandocPlugin implements Plugin<Project> {
 
         project.pluginManager.withPlugin('base') {
             project.tasks.named('assemble') {
-                dependsOn generateTask
+                dependsOn inspectContainerTask
             }
         }
     }

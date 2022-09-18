@@ -66,7 +66,7 @@ with name `generate<document-format>`.
 
 e.g. `generateEpub`, `generatePdf`
 
-These tasks are also all added to the `assemble` task as a task dependency, if present.
+These tasks are also all added to the `assemble` task as a task dependency, assuming that task is available.
 
 ## Running
 To generate a specific document format, run the corresponding generate task e.g. 
