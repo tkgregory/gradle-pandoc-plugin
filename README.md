@@ -86,3 +86,11 @@ Or to generate all document formats at once:
 
 On completion, a file is generated within the `pandocDirectory` with name `<project-name>.<document-format>` 
 e.g. `gradle-build-bible.epub`.
+
+## Releasing
+
+Run the following step manually, passing `incrementMajor` or `incrementMinor`.
+
+`./gradlew release -Prelease.versionIncrementer=<increment-option>`
+
+This will push a new tag, then the CI build will publish the new plugin version.
