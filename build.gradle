@@ -1,8 +1,11 @@
 plugins {
     id 'groovy-gradle-plugin'
+    id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '1.0.0'
     id 'pl.allegro.tech.build.axion-release' version '1.14.0'
 }
 
+group 'com.tomgregory'
 project.version = scmVersion.version
 
 scmVersion {
@@ -25,9 +28,17 @@ test {
 
 gradlePlugin {
     plugins {
-        fileDiff {
+        pandocPlugin {
             id = 'com.tomgregory.pandoc'
+            displayName = 'Gradle Pandoc Plugin'
+            description = 'Easy way to generate various document formats from markdown using Pandoc.'
             implementationClass = 'com.tomgregory.gradle.pandoc.PandocPlugin'
         }
     }
+}
+
+pluginBundle {
+    website = 'https://github.com/tkgregory/gradle-pandoc-plugin'
+    vcsUrl = 'https://github.com/tkgregory/gradle-pandoc-plugin'
+    tags = ['pandoc', 'docker', 'gradle']
 }
