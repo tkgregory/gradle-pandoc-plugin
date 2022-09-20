@@ -40,5 +40,5 @@ gradlePlugin {
 pluginBundle {
     website = 'https://github.com/tkgregory/gradle-pandoc-plugin'
     vcsUrl = 'https://github.com/tkgregory/gradle-pandoc-plugin'
-    tags = ['pandoc', 'docker', 'gradle']
+    tags = ['pandoc', 'docker']
 }
