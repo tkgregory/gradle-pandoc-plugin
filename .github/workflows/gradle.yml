@@ -27,8 +27,8 @@ jobs:
         name: Gradle Tests
         path: build/test-results/test/*.xml
         reporter: java-junit
-    - name: Release
-      if: github.ref == 'refs/heads/master'
+    - name: Publish
+      if: startsWith(github.ref, 'refs/tags/v')
       uses: gradle/gradle-build-action@v2
       with:
-        arguments: release
+        arguments: publishPlugins -Pgradle.publish.key=${{ secrets.PLUGIN_PORTAL_KEY }} -Pgradle.publish.secret=${{ secrets.PLUGIN_PORTAL_SECRET }}
