@@ -1,5 +1,12 @@
 plugins {
     id 'groovy-gradle-plugin'
+    id 'pl.allegro.tech.build.axion-release' version '1.14.0'
+}
+
+project.version = scmVersion.version
+
+scmVersion {
+    versionIncrementer('incrementMinor')
 }
 
 repositories {

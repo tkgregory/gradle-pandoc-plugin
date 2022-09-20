@@ -30,3 +30,7 @@ jobs:
         name: Gradle Tests
         path: build/test-results/test/*.xml
         reporter: java-junit
+    - name: Release
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: release
