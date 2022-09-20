@@ -94,3 +94,6 @@ Run the following step manually, passing `incrementMajor` or `incrementMinor`.
 `./gradlew release -Prelease.versionIncrementer=<increment-option>`
 
 This will push a new tag, then the CI build will publish the new plugin version.
+
+You may need to provide your GitHub token by passing 
+`-Prelease.customUsername=<your-username> -Prelease.customPassword=<your-token>`. 
