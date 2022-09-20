@@ -7,12 +7,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: [ 8, 11, 17 ]
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'temurin'
     - name: Build
-      run: ./gradlew build
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: build
     - name: Test report
       uses: dorny/test-reporter@v1
       if: always()
